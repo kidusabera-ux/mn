@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodePrompt Vault</title>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/lib/codemirror.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/mode/sql/sql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/edit/matchbrackets.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/lib/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/theme/eclipse.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #dee2e6;
+            --primary-color: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #0dcaf0;
+            --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            --shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            --border-radius: 0.375rem;
+            --transition: all 0.3s ease;
+        }
+
+        .dark-mode {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --card-bg: #2d2d2d;
+            --border-color: #444;
+            --primary-color: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #0dcaf0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: var(--transition);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .logo i {
+            color: var(--primary-color);
+        }
+
+        .user-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+            color: var(--primary-color);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .logout-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .logout-btn:hover {
+            background-color: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+        }
+
+        /* Auth Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .btn {
+            display: inline-block;
+            font-weight: 500;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            border: 1px solid transparent;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            color: white;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .btn-link {
+            color: var(--primary-color);
+            background: none;
+            border: none;
+            padding: 0;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .btn-link:hover {
+            color: var(--primary-hover);
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            overflow: hidden;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid transparent;
+            border-bottom: none;
+            background-color: transparent;
+        }
+
+        .nav-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .nav-tab:hover:not(.active) {
+            background-color: rgba(13, 110, 253, 0.1);
+            color: var(--primary-color);
+        }
+
+        /* Dashboard */
+        .search-filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .search-container {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-color);
+            opacity: 0.5;
+        }
+
+        .filter-select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .btn-export {
+            background-color: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .btn-export:hover {
+            background-color: #157347;
+            border-color: #157347;
+        }
+
+        /* Snippets Grid */
+        .snippets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .snippet-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .snippet-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .snippet-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .snippet-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin: 0;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .language-tag {
+            background-color: rgba(13, 110, 253, 0.1);
+            color: var(--primary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .snippet-body {
+            padding: 1rem;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: var(--secondary-color);
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .code-preview {
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: var(--border-radius);
+            padding: 0.75rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            color: #e0e0e0;
+            max-height: 100px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .snippet-description {
+            color: var(--text-color);
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .snippet-footer {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .snippet-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background-color: transparent;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.75rem;
+        }
+
+        .action-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .action-btn.edit {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .action-btn.edit:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+
+        .action-btn.delete {
+            color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .action-btn.delete:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--border-color);
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        /* Form Styles */
+        .form-container {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 0.5rem;
+            min-height: 40px;
+            background-color: var(--bg-color);
+            gap: 0.5rem;
+        }
+
+        .tag-pill {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tag-pill .remove-tag {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tags-input input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 0.25rem;
+            font-size: 0.875rem;
+            outline: none;
+            color: var(--text-color);
+        }
+
+        .code-editor {
+            margin-bottom: 1rem;
+        }
+
+        .code-editor label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .CodeMirror {
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            font-size: 0.875rem;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-cancel {
+            background-color: var(--secondary-color);
+            color: white;
+            border-color: var(--secondary-color);
+        }
+
+        .btn-cancel:hover {
+            background-color: #5c636a;
+            border-color: #5c636a;
+        }
+
+        /* Import/Export */
+        .import-container {
+            text-align: center;
+            padding: 2rem;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .import-container:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        .import-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .import-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .import-btn:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .search-filter-bar {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                width: 100%;
+                margin-left: 0;
+            }
+
+            .snippets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="authModalTitle">Sign In</h5>
+                <button class="close-modal" id="closeAuthModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="authForm">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" required minlength="6">
+                        <div class="error-message" id="passwordError"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="authSubmitBtn">Sign In</button>
+                    <div class="auth-toggle">
+                        <button type="button" class="btn btn-link" id="toggleAuthMode">
+                            Don't have an account? Sign up
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app">
+        <header>
+            <div class="header-content">
+                <a href="#" class="logo">
+                    <i class="fas fa-code"></i>
+                    <span>CodePrompt Vault</span>
+                </a>
+                <div class="user-controls">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="user-info" id="userInfo" style="display: none;">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <span id="userName">User</span>
+                        <button class="logout-btn" id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+                <div class="nav-tab" data-tab="add">Add Snippet</div>
+                <div class="nav-tab" data-tab="import">Import/Export</div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div id="dashboardTab" class="tab-content active">
+                <!-- Search and Filter Bar -->
+                <div class="search-filter-bar">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search by title, tags, or code...">
+                    </div>
+                    <select class="filter-select" id="languageFilter">
+                        <option value="">All Languages</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="Python">Python</option>
+                        <option value="Java">Java</option>
+                        <option value="C++">C++</option>
+                        <option value="TypeScript">TypeScript</option>
+                        <option value="React">React</option>
+                        <option value="Node.js">Node.js</option>
+                        <option value="HTML/CSS">HTML/CSS</option>
+                        <option value="SQL">SQL</option>
+                        <option value="Go">Go</option>
+                        <option value="Rust">Rust</option>
+                        <option value="PHP">PHP</option>
+                        <option value="Ruby">Ruby</option>
+                        <option value="Swift">Swift</option>
+                        <option value="Kotlin">Kotlin</option>
+                    </select>
+                    <div class="action-buttons">
+                        <button class="btn btn-export" id="exportBtn">
+                            <i class="fas fa-download"></i> Export All
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Snippets Grid -->
+                <div class="snippets-grid" id="snippetsGrid">
+                    <!-- Snippets will be inserted here -->
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>No snippets found</h3>
+                        <p>Get started by adding your first code snippet.</p>
+                        <button class="btn btn-primary" id="goToAddBtn">Add Your First Snippet</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Snippet Tab -->
+            <div id="addTab" class="tab-content" style="display: none;">
+                <div class="form-container">
+                    <h2 class="form-title" id="formTitle">Add New Snippet</h2>
+                    <form id="snippetForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="title">Title *</label>
+                                <input type="text" class="form-control" id="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="language">Language</label>
+                                <select class="form-control" id="language">
+                                    <option value="">Select language</option>
+                                    <option value="JavaScript">JavaScript</option>
+                                    <option value="Python">Python</option>
+                                    <option value="Java">Java</option>
+                                    <option value="C++">C++</option>
+                                    <option value="TypeScript">TypeScript</option>
+                                    <option value="React">React</option>
+                                    <option value="Node.js">Node.js</option>
+                                    <option value="HTML/CSS">HTML/CSS</option>
+                                    <option value="SQL">SQL</option>
+                                    <option value="Go">Go</option>
+                                    <option value="Rust">Rust</option>
+                                    <option value="PHP">PHP</option>
+                                    <option value="Ruby">Ruby</option>
+                                    <option value="Swift">Swift</option>
+                                    <option value="Kotlin">Kotlin</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="tags">Tags</label>
+                            <div class="tags-input" id="tagsInput">
+                                <input type="text" id="tagInput" placeholder="Add tags...">
+                            </div>
+                        </div>
+
+                        <div class="form-group code-editor">
+                            <label for="code">Code</label>
+                            <textarea id="code" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Description (optional)</label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-cancel" id="cancelBtn">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">Add Snippet</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Import/Export Tab -->
+            <div id="importTab" class="tab-content" style="display: none;">
+                <div class="form-container">
+                    <h2 class="form-title">Import/Export Snippets</h2>
+                    
+                    <div class="import-container">
+                        <i class="fas fa-file-import import-icon"></i>
+                        <h3>Import Snippets</h3>
+                        <p>Upload a JSON file containing your code snippets</p>
+                        <input type="file" id="importFile" class="file-input" accept=".json">
+                        <button class="import-btn" id="importBtn">
+                            <i class="fas fa-upload"></i> Choose File
+                        </button>
+                        <p class="mt-2" style="font-size: 0.875rem; color: var(--text-color); opacity: 0.7;">
+                            File should be a JSON array of snippet objects with the same structure as exported files.
+                        </p>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-export" id="exportAllBtn">
+                            <i class="fas fa-download"></i> Export All Snippets
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App state
+        let user = null;
+        let snippets = [];
+        let editingSnippet = null;
+        let darkMode = false;
+        let tags = [];
+
+        // DOM Elements
+        const app = document.getElementById('app');
+        const authModal = document.getElementById('authModal');
+        const closeAuthModal = document.getElementById('closeAuthModal');
+        const authForm = document.getElementById('authForm');
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        const toggleAuthMode = document.getElementById('toggleAuthMode');
+        const authModalTitle = document.getElementById('authModalTitle');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        
+        const userInfo = document.getElementById('userInfo');
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        const searchInput = document.getElementById('searchInput');
+        const languageFilter = document.getElementById('languageFilter');
+        const exportBtn = document.getElementById('exportBtn');
+        const snippetsGrid = document.getElementById('snippetsGrid');
+        const goToAddBtn = document.getElementById('goToAddBtn');
+        
+        const snippetForm = document.getElementById('snippetForm');
+        const formTitle = document.getElementById('formTitle');
+        const title = document.getElementById('title');
+        const snippetLanguage = document.getElementById('language');
+        const tagsInput = document.getElementById('tagsInput');
+        const tagInput = document.getElementById('tagInput');
+        const code = document.getElementById('code');
+        const description = document.getElementById('description');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        const importFile = document.getElementById('importFile');
+        const importBtn = document.getElementById('importBtn');
+        const exportAllBtn = document.getElementById('exportAllBtn');
+        const goToAddBtn2 = document.getElementById('goToAddBtn');
+
+        // Initialize CodeMirror
+        let editor;
+        function initCodeMirror() {
+            if (editor) {
+                editor.toTextArea();
+            }
+            editor = CodeMirror.fromTextArea(code, {
+                lineNumbers: true,
+                mode: "javascript",
+                theme: darkMode ? "dracula" : "eclipse",
+                autoCloseBrackets: true,
+                matchBrackets: true,
+                indentUnit: 2,
+                smartIndent: true,
+                tabSize: 2,
+                indentWithTabs: false,
+                lineWrapping: true
+            });
+        }
+
+        // Load data from localStorage
+        function loadData() {
+            const savedSnippets = localStorage.getItem('codeprompt-snippets');
+            const savedUser = localStorage.getItem('codeprompt-user');
+            const savedDarkMode = localStorage.getItem('codeprompt-dark-mode');
+            
+            if (savedSnippets) {
+                snippets = JSON.parse(savedSnippets);
+            }
+            if (savedUser) {
+                user = JSON.parse(savedUser);
+                updateUserUI();
+            }
+            if (savedDarkMode === 'true') {
+                darkMode = true;
+                document.body.classList.add('dark-mode');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('codeprompt-snippets', JSON.stringify(snippets));
+            if (user) {
+                localStorage.setItem('codeprompt-user', JSON.stringify(user));
+            }
+            localStorage.setItem('codeprompt-dark-mode', darkMode.toString());
+        }
+
+        // Update user interface
+        function updateUserUI() {
+            if (user) {
+                userInfo.style.display = 'flex';
+                userName.textContent = user.name;
+                userAvatar.textContent = user.name.charAt(0).toUpperCase();
+            } else {
+                userInfo.style.display = 'none';
+            }
+        }
+
+        // Show auth modal
+        function showAuthModal(mode = 'login') {
+            authModal.style.display = 'flex';
+            if (mode === 'login') {
+                authModalTitle.textContent = 'Sign In';
+                authSubmitBtn.textContent = 'Sign In';
+                toggleAuthMode.textContent = "Don't have an account? Sign up";
+            } else {
+                authModalTitle.textContent = 'Sign Up';
+                authSubmitBtn.textContent = 'Sign Up';
+                toggleAuthMode.textContent = 'Already have an account? Sign in';
+            }
+            clearErrors();
+        }
+
+        // Clear form errors
+        function clearErrors() {
+            emailError.textContent = '';
+            passwordError.textContent = '';
+            email.classList.remove('error');
+            password.classList.remove('error');
+        }
+
+        // Validate form
+        function validateForm() {
+            clearErrors();
+            let isValid = true;
+
+            if (!email.value.trim()) {
+                emailError.textContent = 'Email is required';
+                email.classList.add('error');
+                isValid = false;
+            } else if (!/\S+@\S+\.\S+/.test(email.value)) {
+                emailError.textContent = 'Email is invalid';
+                email.classList.add('error');
+                isValid = false;
+            }
+
+            if (!password.value) {
+                passwordError.textContent = 'Password is required';
+                password.classList.add('error');
+                isValid = false;
+            } else if (password.value.length < 6) {
+                passwordError.textContent = 'Password must be at least 6 characters';
+                password.classList.add('error');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        // Add snippet
+        function addSnippet() {
+            const newSnippet = {
+                id: Date.now(),
+                title: title.value.trim(),
+                language: snippetLanguage.value,
+                tags: [...tags],
+                code: editor.getValue(),
+                description: description.value.trim(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            snippets.unshift(newSnippet);
+            saveData();
+            renderSnippets();
+            resetForm();
+        }
+
+        // Update snippet
+        function updateSnippet() {
+            const updatedSnippet = {
+                ...editingSnippet,
+                title: title.value.trim(),
+                language: snippetLanguage.value,
+                tags: [...tags],
+                code: editor.getValue(),
+                description: description.value.trim(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            snippets = snippets.map(snippet => 
+                snippet.id === editingSnippet.id ? updatedSnippet : snippet
+            );
+            
+            saveData();
+            renderSnippets();
+            resetForm();
+        }
+
+        // Delete snippet
+        function deleteSnippet(id) {
+            if (confirm('Are you sure you want to delete this snippet?')) {
+                snippets = snippets.filter(snippet => snippet.id !== id);
+                saveData();
+                renderSnippets();
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            snippetForm.reset();
+            tags = [];
+            renderTags();
+            editor.setValue('');
+            editingSnippet = null;
+            formTitle.textContent = 'Add New Snippet';
+            submitBtn.textContent = 'Add Snippet';
+        }
+
+        // Render tags
+        function renderTags() {
+            const tagsContainer = document.querySelector('.tags-input');
+            tagsContainer.innerHTML = '';
+            
+            tags.forEach(tag => {
+                const tagElement = document.createElement('div');
+                tagElement.className = 'tag-pill';
+                tagElement.innerHTML = `${tag} <span class="remove-tag">×</span>`;
+                tagElement.querySelector('.remove-tag').onclick = () => {
+                    tags = tags.filter(t => t !== tag);
+                    renderTags();
+                };
+                tagsContainer.appendChild(tagElement);
+            });
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'tagInput';
+            input.placeholder = tags.length === 0 ? 'Add tags...' : '';
+            input.onkeydown = handleTagInput;
+            tagsContainer.appendChild(input);
+        }
+
+        // Handle tag input
+        function handleTagInput(e) {
+            if (e.key === 'Enter' && e.target.value.trim()) {
+                e.preventDefault();
+                const tag = e.target.value.trim();
+                if (tag && !tags.includes(tag)) {
+                    tags.push(tag);
+                    e.target.value = '';
+                    renderTags();
+                }
+            }
+        }
+
+        // Render snippets
+        function renderSnippets() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filter = languageFilter.value;
+            
+            const filteredSnippets = snippets.filter(snippet => {
+                const matchesSearch = !searchTerm || 
+                    snippet.title.toLowerCase().includes(searchTerm) ||
+                    snippet.code.toLowerCase().includes(searchTerm) ||
+                    snippet.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                
+                const matchesFilter = !filter || snippet.language === filter;
+                
+                return matchesSearch && matchesFilter;
+            });
+            
+            if (filteredSnippets.length === 0) {
+                snippetsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>No snippets found</h3>
+                        <p>${searchTerm || filter ? 'Try adjusting your search or filter criteria.' : 'Get started by adding your first code snippet.'}</p>
+                        <button class="btn btn-primary" id="goToAddBtn">Add Your First Snippet</button>
+                    </div>
+                `;
+                document.getElementById('goToAddBtn').onclick = () => {
+                    setActiveTab('add');
+                };
+                return;
+            }
+            
+            snippetsGrid.innerHTML = '';
+            filteredSnippets.forEach(snippet => {
+                const snippetElement = document.createElement('div');
+                snippetElement.className = 'snippet-card';
+                snippetElement.innerHTML = `
+                    <div class="snippet-header">
+                        <h3 class="snippet-title">${escapeHtml(snippet.title)}</h3>
+                        ${snippet.language ? `<span class="language-tag">${escapeHtml(snippet.language)}</span>` : ''}
+                    </div>
+                    <div class="snippet-body">
+                        ${snippet.tags.length > 0 ? `
+                            <div class="tags-container">
+                                ${snippet.tags.slice(0, 3).map(tag => 
+                                    `<span class="tag">${escapeHtml(tag)}</span>`
+                                ).join('')}
+                                ${snippet.tags.length > 3 ? 
+                                    `<span class="tag">+${snippet.tags.length - 3} more</span>` : ''
+                                }
+                            </div>
+                        ` : ''}
+                        
+                        <div class="code-preview">${escapeHtml(snippet.code.length > 100 ? snippet.code.substring(0, 100) + '...' : snippet.code)}</div>
+                        
+                        ${snippet.description ? `
+                            <div class="snippet-description">${escapeHtml(snippet.description)}</div>
+                        ` : ''}
+                    </div>
+                    <div class="snippet-footer">
+                        <span>Last edited: ${new Date(snippet.updatedAt).toLocaleDateString()}</span>
+                        <div class="snippet-actions">
+                            <button class="action-btn edit" data-id="${snippet.id}">Edit</button>
+                            <button class="action-btn delete" data-id="${snippet.id}">Delete</button>
+                        </div>
+                    </div>
+                `;
+                snippetsGrid.appendChild(snippetElement);
+            });
+            
+            // Add event listeners to buttons
+            document.querySelectorAll('.action-btn.edit').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    const snippet = snippets.find(s => s.id === id);
+                    editSnippet(snippet);
+                });
+            });
+            
+            document.querySelectorAll('.action-btn.delete').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = parseInt(btn.getAttribute('data-id'));
+                    deleteSnippet(id);
+                });
+            });
+        }
+
+        // Edit snippet
+        function editSnippet(snippet) {
+            editingSnippet = snippet;
+            title.value = snippet.title;
+            snippetLanguage.value = snippet.language;
+            tags = [...snippet.tags];
+            renderTags();
+            editor.setValue(snippet.code);
+            description.value = snippet.description;
+            formTitle.textContent = 'Edit Snippet';
+            submitBtn.textContent = 'Update Snippet';
+            setActiveTab('add');
+        }
+
+        // Export snippets
+        function exportSnippets() {
+            const dataStr = JSON.stringify(snippets, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'codeprompt-snippets.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Import snippets
+        function importSnippets(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (Array.isArray(imported)) {
+                            // Validate snippet structure
+                            const validSnippets = imported.filter(item => 
+                                item.title && item.code && item.id
+                            );
+                            
+                            if (validSnippets.length > 0) {
+                                snippets = [...validSnippets, ...snippets];
+                                saveData();
+                                renderSnippets();
+                                alert(`Successfully imported ${validSnippets.length} snippets!`);
+                            } else {
+                                alert('No valid snippets found in the file.');
+                            }
+                        } else {
+                            alert('Invalid file format. Expected a JSON array of snippets.');
+                        }
+                    } catch (error) {
+                        alert('Error parsing file: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Set active tab
+        function setActiveTab(tabName) {
+            navTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            const activeTab = document.querySelector(`.nav-tab[data-tab="${tabName}"]`);
+            const activeContent = document.getElementById(`${tabName}Tab`);
+            
+            if (activeTab) activeTab.classList.add('active');
+            if (activeContent) activeContent.style.display = 'block';
+            
+            if (tabName === 'add') {
+                initCodeMirror();
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            initCodeMirror();
+            
+            if (!user) {
+                showAuthModal('login');
+            } else {
+                updateUserUI();
+                renderSnippets();
+            }
+            
+            // Navigation tabs
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    setActiveTab(tab.getAttribute('data-tab'));
+                });
+            });
+            
+            // Auth modal
+            closeAuthModal.addEventListener('click', () => {
+                authModal.style.display = 'none';
+            });
+            
+            window.addEventListener('click', (e) => {
+                if (e.target === authModal) {
+                    authModal.style.display = 'none';
+                }
+            });
+            
+            toggleAuthMode.addEventListener('click', () => {
+                const currentMode = authSubmitBtn.textContent.includes('Sign In') ? 'login' : 'signup';
+                showAuthModal(currentMode === 'login' ? 'signup' : 'login');
+            });
+            
+            authForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (validateForm()) {
+                    const mode = authSubmitBtn.textContent.includes('Sign In') ? 'login' : 'signup';
+                    
+                    if (mode === 'signup') {
+                        user = {
+                            id: Date.now(),
+                            email: email.value,
+                            name: email.value.split('@')[0]
+                        };
+                    } else {
+                        user = {
+                            id: Date.now(),
+                            email: email.value,
+                            name: email.value.split('@')[0]
+                        };
+                    }
+                    
+                    saveData();
+                    authModal.style.display = 'none';
+                    updateUserUI();
+                    renderSnippets();
+                }
+            });
+            
+            // Theme toggle
+            themeToggle.addEventListener('click', () => {
+                darkMode = !darkMode;
+                document.body.classList.toggle('dark-mode', darkMode);
+                themeToggle.innerHTML = darkMode ? 
+                    '<i class="fas fa-sun"></i>' : 
+                    '<i class="fas fa-moon"></i>';
+                initCodeMirror(); // Reinitialize CodeMirror with new theme
+                saveData();
+            });
+            
+            // Logout
+            logoutBtn.addEventListener('click', () => {
+                user = null;
+                saveData();
+                updateUserUI();
+                setActiveTab('dashboard');
+                renderSnippets();
+                showAuthModal('login');
+            });
+            
+            // Search and filter
+            searchInput.addEventListener('input', renderSnippets);
+            languageFilter.addEventListener('change', renderSnippets);
+            exportBtn.addEventListener('click', exportSnippets);
+            exportAllBtn.addEventListener('click', exportSnippets);
+            
+            // Go to add snippet
+            if (goToAddBtn) {
+                goToAddBtn.addEventListener('click', () => {
+                    setActiveTab('add');
+                });
+            }
+            if (goToAddBtn2) {
+                goToAddBtn2.addEventListener('click', () => {
+                    setActiveTab('add');
+                });
+            }
+            
+            // Tags input
+            tagInput.addEventListener('keydown', handleTagInput);
+            
+            // Form submission
+            snippetForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                if (title.value.trim() && editor.getValue().trim()) {
+                    if (editingSnippet) {
+                        updateSnippet();
+                    } else {
+                        addSnippet();
+                    }
+                }
+            });
+            
+            // Cancel button
+            cancelBtn.addEventListener('click', resetForm);
+            
+            // Import button
+            importBtn.addEventListener('click', () => {
+                importFile.click();
+            });
+            
+            importFile.addEventListener('change', importSnippets);
+        });
+    </script>
+</body>
+</html>
